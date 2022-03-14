@@ -76,6 +76,8 @@ jobs:
       - name: Publish code coverage
         if: endsWith(github.ref, '/main') && github.event_name == 'push'
         run: yarn coverage
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
       - name: Publish to npm
         if: endsWith(github.ref, '/main') && github.event_name == 'push'
