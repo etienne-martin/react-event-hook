@@ -1,0 +1,5 @@
+.idea
+dist
+yarn-error.log
+node_modules
+coverage
