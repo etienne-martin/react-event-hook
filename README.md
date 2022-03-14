@@ -41,7 +41,7 @@ import { useEmitter } from "react-event-hook";
 const EmitterComponent = () => {
   const emit = useEmitter();
 
-  return <button onClick={() => emit("increment")} />;
+  return <button onClick={() => emit("increment")}>Increment</button>;
 };
 ```
 
