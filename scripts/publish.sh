@@ -26,5 +26,5 @@ PACKAGE_VERSION=$(cat package.json \
 if npm show "$PACKAGE_NAME" version | grep -w "$PACKAGE_VERSION" > /dev/null; then
   echo "$PACKAGE_NAME@$PACKAGE_VERSION is already published!";
 else
-  npm publish --access public --dry-run
+  npm publish --access public
 fi
