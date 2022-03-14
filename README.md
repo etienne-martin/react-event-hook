@@ -53,4 +53,4 @@ Run `yarn test` and update the tests if needed.
 
 ## License
 
-This is a free/libre library under license LGPL v3 or later.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/etienne-martin/react-event-hook/blob/main/LICENSE) file for details.
