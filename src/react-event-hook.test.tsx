@@ -26,32 +26,30 @@ const EmitterComponent: FC = () => {
 };
 
 describe("react-event-hook", () => {
-  describe("useListener", () => {
-    it("should emit and receive events", () => {
-      const { getByTestId } = render(
-        <>
-          <ListenerComponent />
-          <EmitterComponent />
-        </>
-      );
+  it("should emit and receive events", () => {
+    const { getByTestId } = render(
+      <>
+        <ListenerComponent />
+        <EmitterComponent />
+      </>
+    );
 
-      const emitButton = getByTestId("emit-button");
-      const counter = getByTestId("counter");
+    const emitButton = getByTestId("emit-button");
+    const counter = getByTestId("counter");
 
-      emitButton.click();
-      emitButton.click();
-      emitButton.click();
+    emitButton.click();
+    emitButton.click();
+    emitButton.click();
 
-      expect(counter.innerHTML).toEqual("3");
-    });
+    expect(counter.innerHTML).toEqual("3");
+  });
 
-    it("should remove listeners when unmounting", () => {
-      const getListenerCount = () => EventEmitterMock.listenerCount("my-event");
-      const { unmount } = render(<ListenerComponent />);
+  it("should remove listeners when unmounting", () => {
+    const getListenerCount = () => EventEmitterMock.listenerCount("my-event");
+    const { unmount } = render(<ListenerComponent />);
 
-      expect(getListenerCount()).toEqual(1);
-      unmount();
-      expect(getListenerCount()).toEqual(0);
-    });
+    expect(getListenerCount()).toEqual(1);
+    unmount();
+    expect(getListenerCount()).toEqual(0);
   });
 });
