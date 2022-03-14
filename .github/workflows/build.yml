@@ -73,6 +73,10 @@ jobs:
               body: output
             })
 
+      - name: Publish code coverage
+        if: endsWith(github.ref, '/main') && github.event_name == 'push'
+        run: yarn coverage
+
       - name: Publish to npm
         if: endsWith(github.ref, '/main') && github.event_name == 'push'
         run: ./scripts/publish.sh
