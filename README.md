@@ -1,6 +1,8 @@
 # react-event-hook
 
-A library for emitting and listening to events in a React application.
+A library for emitting and listening to events in a React application. 
+
+The idea for this package comes from [a Tweet](https://twitter.com/pedronauck/status/1502792417761800193?s=20&t=PFC7inszDOUhRFf7se88UA) by [@pedronauck](https://github.com/pedronauck).
 
 [![Coveralls github](https://img.shields.io/coveralls/github/etienne-martin/react-event-hook.svg)](https://coveralls.io/github/etienne-martin/react-event-hook)
 [![npm monthly downloads](https://img.shields.io/npm/dm/react-event-hook.svg)](https://www.npmjs.com/package/react-event-hook)
@@ -13,36 +15,79 @@ To use react-event-hook in your project, run:
 yarn add react-event-hook
 ```
 
+## Creating events
+
+Events can be declared using the `createEvent` function. This function only takes the name of the event as an argument. It can be whatever you want. The result will be an object containing two functions, a listener and an emitter. Their name will automatically be derived from the name that was chosen for the event. 
+
+```javascript
+import { createEvent } from "react-event-hook";
+
+const { usePingListener, emitPing } = createEvent("ping")();
+const { usePongListener, emitPong } = createEvent("pong")();
+```
+
+### Cross-tab events
+
+Events can also extend to other tabs or windows by enabling the `crossTab` option.
+
+```javascript
+const { useSignInListener, emitSignIn } = createEvent("signIn")({
+  crossTab: true
+});
+```
+
+When cross-tab events are emitted, they are first serialized using `JSON.stringify()`. If an event contains values that cannot be converted to JSON, the serialization process may transform them in unexpected ways. The solution is to stick with serializable values like arrays, simple objects or primitives (strings, numbers, booleans, null) when emitting cross-tabs events.
+
 ## Listening for events
 
-Event listeners can be registered using the `useListener` hook. Listeners are automatically removed when components are unmounted to avoid memory leaks.
+Events can be listened to using the listener function returned by `createEvent`. Listeners come in the form of a custom React hook.
 
 ```jsx
-import { useListener } from "react-event-hook";
+import { useMessageListener } from "./events";
 
 const ListenerComponent = () => {
-  const [count, setCount] = useState(0);
-
-  useListener("increment", () => {
-    setCount(count + 1);
+  useMessageListener((message) => {
+    console.log("Recieved a message:", message);
   });
 
-  return <div>{count}</div>;
+  return <>...</>;
 };
 ```
 
 ## Emitting events
 
-Events can be emitted from anywhere in your application using the `useEmitter` hook.
+Events can be emitted from anywhere in your application using the emitter function.
 
 ```jsx
-import { useEmitter } from "react-event-hook";
+import { emitMessage } from "./events";
 
-const EmitterComponent = () => {
-  const emit = useEmitter();
+const EmitterComponent = () => (
+  <button onClick={() => emitMessage("hello")}>Send Message</button>
+);
+```
 
-  return <button onClick={() => emit("increment")}>Increment</button>;
-};
+## TypeScript
+
+This library is written in TypeScript to ensure type safety. It requires TypeScript v4.1 or greater due to its use of [Key Remapping](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as) and [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
+
+### Typing events
+
+Events can be typed using the following syntax:
+
+```typescript
+import { createEvent } from "react-event-hook";
+
+interface Message {
+  subject: string;
+  body: string;
+}
+
+const { useMessageListener, emitMessage } = createEvent("message")<Message>(options);
+
+emitMessage({
+  subject: "geeting",
+  body: "hello"
+})
 ```
 
 ## Contributing
