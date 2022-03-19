@@ -2,7 +2,7 @@
 
 A library for emitting and listening to events in a React application. 
 
-The idea for this package comes from [a Tweet](https://twitter.com/pedronauck/status/1502792417761800193?s=20&t=PFC7inszDOUhRFf7se88UA) by [@pedronauck](https://github.com/pedronauck).
+The idea for this package came from [a Tweet](https://twitter.com/pedronauck/status/1502792417761800193?s=20&t=PFC7inszDOUhRFf7se88UA) by [@pedronauck](https://github.com/pedronauck).
 
 [![Coveralls github](https://img.shields.io/coveralls/github/etienne-martin/react-event-hook.svg)](https://coveralls.io/github/etienne-martin/react-event-hook)
 [![npm monthly downloads](https://img.shields.io/npm/dm/react-event-hook.svg)](https://www.npmjs.com/package/react-event-hook)
@@ -82,12 +82,12 @@ interface Message {
   body: string;
 }
 
-const { useMessageListener, emitMessage } = createEvent("message")<Message>(options);
+const { emitMessage } = createEvent("message")<Message>(options);
 
 emitMessage({
   subject: "geeting",
-  body: "hello"
-})
+  body: "hello",
+});
 ```
 
 ## Contributing
