@@ -47,7 +47,7 @@ import { useMessageListener } from "./events";
 
 const ListenerComponent = () => {
   useMessageListener((message) => {
-    console.log("Recieved a message:", message);
+    console.log("Received a message:", message);
   });
 
   return <>...</>;
@@ -82,7 +82,7 @@ interface Message {
   body: string;
 }
 
-const { emitMessage } = createEvent("message")<Message>(options);
+const { emitMessage } = createEvent("message")<Message>();
 
 emitMessage({
   subject: "geeting",
