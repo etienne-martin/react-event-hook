@@ -85,7 +85,7 @@ interface Message {
 const { emitMessage } = createEvent("message")<Message>();
 
 emitMessage({
-  subject: "geeting",
+  subject: "greeting",
   body: "hello",
 });
 ```
