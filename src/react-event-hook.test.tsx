@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { createEvent } from "./react-event-hook";
 import { renderHook } from "@testing-library/react-hooks";
 import { serializeEvent } from "./helpers/event-serializer";
-import { getStorageKey } from "./helpers/storage-key";
+import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 
 const eventHandler = jest.fn();
 
@@ -82,7 +82,7 @@ describe("react-event-hook", () => {
       emitPing();
 
       expect(storageSetItemSpy).toBeCalledWith(
-        getStorageKey("ping"),
+        LOCAL_STORAGE_KEY,
         expect.any(String)
       );
     });
@@ -95,8 +95,8 @@ describe("react-event-hook", () => {
       renderHook(() => useMessageListener(eventHandler));
 
       dispatchStorageEvent({
-        key: getStorageKey("message"),
-        newValue: serializeEvent("hello"),
+        key: LOCAL_STORAGE_KEY,
+        newValue: serializeEvent("message", "hello"),
       });
 
       expect(eventHandler).toBeCalledWith("hello");
@@ -108,8 +108,8 @@ describe("react-event-hook", () => {
       renderHook(() => usePingListener(eventHandler));
 
       dispatchStorageEvent({
-        key: getStorageKey("ping"),
-        newValue: serializeEvent("hello"),
+        key: LOCAL_STORAGE_KEY,
+        newValue: serializeEvent("ping", "hello"),
       });
 
       expect(eventHandler).not.toBeCalled();
@@ -123,8 +123,23 @@ describe("react-event-hook", () => {
       renderHook(() => usePingListener(eventHandler));
 
       dispatchStorageEvent({
-        key: getStorageKey("ping"),
+        key: LOCAL_STORAGE_KEY,
         newValue: null,
+      });
+
+      expect(eventHandler).not.toBeCalled();
+    });
+
+    it("should ignore unrelated react-event-hook events", () => {
+      const { usePingListener } = createEvent("ping")({
+        crossTab: true,
+      });
+
+      renderHook(() => usePingListener(eventHandler));
+
+      dispatchStorageEvent({
+        key: LOCAL_STORAGE_KEY,
+        newValue: serializeEvent("pong", undefined),
       });
 
       expect(eventHandler).not.toBeCalled();
