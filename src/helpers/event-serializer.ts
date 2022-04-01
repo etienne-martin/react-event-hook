@@ -1,10 +1,20 @@
-export const serializeEvent = (event: any) => {
+import { generateRandomNumber } from "../utils/random-number";
+
+interface DeserializedEvent {
+  name: string;
+  payload: any;
+}
+
+export const serializeEvent = (name: string, payload: any) => {
   return JSON.stringify({
-    timestamp: Date.now(),
-    event,
+    id: `${Date.now()}:${generateRandomNumber()}`,
+    name,
+    payload,
   });
 };
 
-export const deserializeEvent = (event: string) => {
-  return JSON.parse(event).event;
+export const deserializeEvent = (event: string): DeserializedEvent => {
+  const { name, payload } = JSON.parse(event);
+
+  return { name, payload };
 };

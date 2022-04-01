@@ -3,7 +3,7 @@ import EventEmitter from "eventemitter3";
 import { capitalize } from "./utils/capitalize";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
-import { getStorageKey } from "./helpers/storage-key";
+import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 
 export interface Options {
   crossTab?: boolean;
@@ -43,15 +43,18 @@ export const createEvent = <EventName extends string>(name: EventName) => {
   > => {
     const listenerName = `use${capitalize(name)}Listener`;
     const emitterName = `emit${capitalize(name)}`;
-    const storageKey = getStorageKey(name);
 
     const useListener: Listener<any> = (handler: any) => {
-      useStorageListener((event) => {
+      useStorageListener((storageEvent) => {
         if (!crossTab) return;
-        if (event.key !== storageKey) return;
-        if (!event.newValue) return;
+        if (!storageEvent.newValue) return;
+        if (storageEvent.key !== LOCAL_STORAGE_KEY) return;
 
-        handler(deserializeEvent(event.newValue));
+        const event = deserializeEvent(storageEvent.newValue);
+
+        if (event.name !== name) return;
+
+        handler(event.payload);
       });
 
       useEffect(() => {
@@ -68,8 +71,11 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
       if (crossTab) {
         try {
-          window.localStorage.setItem(storageKey, serializeEvent(event));
-        } catch (err) {
+          window.localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            serializeEvent(name, event)
+          );
+        } catch {
           /**
            * localStorage doesn't work in private mode prior to Safari 11.
            * Cross-tab events are simply dropped if an error is encountered.
