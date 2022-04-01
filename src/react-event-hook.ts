@@ -9,37 +9,32 @@ export interface Options {
   crossTab?: boolean;
 }
 
-export type Listener<Event> = Event extends undefined
-  ? (handler: () => void) => void
-  : (handler: (event: Event) => void) => void;
+export type Listener<Payload> = (handler: (payload: Payload) => void) => void;
+export type Emitter<Payload> = (payload: Payload) => void;
 
-export type Emitter<Event> = Event extends undefined
-  ? () => void
-  : (event: Event) => void;
-
-interface Base<Event> {
+interface Base<Payload> {
   listener: {
     prefix: "use";
     suffix: "Listener";
-    fn: Listener<Event>;
+    fn: Listener<Payload>;
   };
   emitter: {
     prefix: "emit";
     suffix: "";
-    fn: Emitter<Event>;
+    fn: Emitter<Payload>;
   };
 }
 
-type CreatedEvent<Event, EventName extends string> = {
-  [Property in keyof Base<Event> as `${Base<Event>[Property]["prefix"]}${Capitalize<EventName>}${Base<Event>[Property]["suffix"]}`]: Base<Event>[Property]["fn"];
+type CreatedEvent<EventName extends string, Payload> = {
+  [Property in keyof Base<Payload> as `${Base<Payload>[Property]["prefix"]}${Capitalize<EventName>}${Base<Payload>[Property]["suffix"]}`]: Base<Payload>[Property]["fn"];
 };
 
 const eventEmitter = new EventEmitter();
 
 export const createEvent = <EventName extends string>(name: EventName) => {
-  return <Event = undefined>({ crossTab = false }: Options = {}): CreatedEvent<
-    Event,
-    EventName
+  return <Payload = void>({ crossTab = false }: Options = {}): CreatedEvent<
+    EventName,
+    Payload
   > => {
     const listenerName = `use${capitalize(name)}Listener`;
     const emitterName = `emit${capitalize(name)}`;
