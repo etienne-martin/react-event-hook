@@ -23,7 +23,7 @@ describe("useStorageListener", () => {
     expect(eventHandler).toBeCalled();
   });
 
-  it("should stop receiving events once unmounted", () => {
+  it("should stop listening for events once unmounted", () => {
     renderHook(() => useStorageListener(eventHandler)).unmount();
     dispatchStorageEvent();
     expect(eventHandler).not.toBeCalled();

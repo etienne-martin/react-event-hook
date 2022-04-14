@@ -1,43 +1,33 @@
 import { useEffect } from "react";
 import EventEmitter from "eventemitter3";
-import { capitalize } from "./utils/capitalize";
+import { toPascalCase } from "./utils/pascal-case";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 
-export interface Options {
-  crossTab?: boolean;
-}
-
-export type Listener<Payload> = (handler: (payload: Payload) => void) => void;
-export type Emitter<Payload> = (payload: Payload) => void;
-
-interface Base<Payload> {
-  listener: {
-    prefix: "use";
-    suffix: "Listener";
-    fn: Listener<Payload>;
-  };
-  emitter: {
-    prefix: "emit";
-    suffix: "";
-    fn: Emitter<Payload>;
-  };
-}
-
-type CreatedEvent<EventName extends string, Payload> = {
-  [Property in keyof Base<Payload> as `${Base<Payload>[Property]["prefix"]}${Capitalize<EventName>}${Base<Payload>[Property]["suffix"]}`]: Base<Payload>[Property]["fn"];
-};
+import type {
+  CreatedEvent,
+  Emitter,
+  Listener,
+  Options,
+} from "./react-event-hook.def";
 
 const eventEmitter = new EventEmitter();
+const createdEvents = new Set<string>();
 
 export const createEvent = <EventName extends string>(name: EventName) => {
   return <Payload = void>({ crossTab = false }: Options = {}): CreatedEvent<
     EventName,
     Payload
   > => {
-    const listenerName = `use${capitalize(name)}Listener`;
-    const emitterName = `emit${capitalize(name)}`;
+    const listenerName = `use${toPascalCase(name)}Listener`;
+    const emitterName = `emit${toPascalCase(name)}`;
+
+    if (createdEvents.has(name)) {
+      throw new Error(`An event named "${name}" already exists.`);
+    }
+
+    createdEvents.add(name);
 
     const useListener: Listener<any> = (handler: any) => {
       useStorageListener((storageEvent) => {

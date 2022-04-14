@@ -21,4 +21,5 @@ module.exports = {
   },
   testMatch: ["**/?(*.)(test).{ts,tsx}"],
   collectCoverageFrom: ["./src/**/*.{ts,tsx}"],
+  setupFilesAfterEnv: ["./src/tests/jest.setup.ts"],
 };
