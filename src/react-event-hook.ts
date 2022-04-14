@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import EventEmitter from "eventemitter3";
-import { toPascalCase } from "./utils/pascal-case";
+import { pascalCase } from "./utils/pascal-case";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
@@ -20,14 +20,17 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     EventName,
     Payload
   > => {
-    const listenerName = `use${toPascalCase(name)}Listener`;
-    const emitterName = `emit${toPascalCase(name)}`;
+    const normalizedEventName = pascalCase(name);
+    const listenerName = `use${normalizedEventName}Listener`;
+    const emitterName = `emit${normalizedEventName}`;
 
-    if (createdEvents.has(name)) {
-      throw new Error(`An event named "${name}" already exists.`);
+    if (createdEvents.has(normalizedEventName)) {
+      throw new Error(
+        `Events can only be created once. Another event named "${normalizedEventName}" already exists.`
+      );
     }
 
-    createdEvents.add(name);
+    createdEvents.add(normalizedEventName);
 
     const useListener: Listener<any> = (handler: any) => {
       useStorageListener((storageEvent) => {
@@ -37,28 +40,28 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
         const event = deserializeEvent(storageEvent.newValue);
 
-        if (event.name !== name) return;
+        if (event.name !== normalizedEventName) return;
 
         handler(event.payload);
       });
 
       useEffect(() => {
-        eventEmitter.addListener(name, handler);
+        eventEmitter.addListener(normalizedEventName, handler);
 
         return () => {
-          eventEmitter.removeListener(name, handler);
+          eventEmitter.removeListener(normalizedEventName, handler);
         };
       }, [handler]);
     };
 
     const emitter: Emitter<any> = (event) => {
-      eventEmitter.emit(name, event);
+      eventEmitter.emit(normalizedEventName, event);
 
       if (crossTab) {
         try {
           window.localStorage.setItem(
             LOCAL_STORAGE_KEY,
-            serializeEvent(name, event)
+            serializeEvent(normalizedEventName, event)
           );
         } catch {
           /**

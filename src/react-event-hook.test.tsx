@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
 import { serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
+import { pascalCase } from "./utils/pascal-case";
 
 const eventHandler = jest.fn();
 
@@ -20,6 +21,15 @@ describe("react-event-hook", () => {
     eventHandler.mockClear();
     storageSetItemSpy.mockClear();
     jest.resetModules();
+  });
+
+  it("should derive the event's properties from the event name", async () => {
+    const { createEvent } = await import("./react-event-hook");
+    const { useKebabCaseEventNameListener, emitKebabCaseEventName } =
+      createEvent("kebab-case-event-name")();
+
+    expect(useKebabCaseEventNameListener).toEqual(expect.any(Function));
+    expect(emitKebabCaseEventName).toEqual(expect.any(Function));
   });
 
   it("should emit and receive events", async () => {
@@ -60,8 +70,10 @@ describe("react-event-hook", () => {
 
     createEvent("duplicate-event")();
 
-    expect(() => createEvent("duplicate-event")<string>()).toThrow(
-      new Error(`An event named "duplicate-event" already exists.`)
+    expect(() => createEvent("duplicate-event")()).toThrow(
+      new Error(
+        `Events can only be created once. Another event named "DuplicateEvent" already exists.`
+      )
     );
   });
 
@@ -85,54 +97,6 @@ describe("react-event-hook", () => {
 
     emitPing();
     expect(eventHandler).not.toBeCalled();
-  });
-
-  describe("event name derivation", () => {
-    it("should properly derive the event's properties from a camelCase event name", async () => {
-      const { createEvent } = await import("./react-event-hook");
-      const { useCamelCaseEventListener, emitCamelCaseEvent } =
-        createEvent("camelCaseEvent")();
-
-      expect(useCamelCaseEventListener).toEqual(expect.any(Function));
-      expect(emitCamelCaseEvent).toEqual(expect.any(Function));
-    });
-
-    it("should properly derive the event's properties from a PascalCase event name", async () => {
-      const { createEvent } = await import("./react-event-hook");
-      const { usePascalCaseEventListener, emitPascalCaseEvent } =
-        createEvent("PascalCaseEvent")();
-
-      expect(usePascalCaseEventListener).toEqual(expect.any(Function));
-      expect(emitPascalCaseEvent).toEqual(expect.any(Function));
-    });
-
-    it("should properly derive the event's properties from a kebab-case event name", async () => {
-      const { createEvent } = await import("./react-event-hook");
-      const { useKebabCaseEventListener, emitKebabCaseEvent } =
-        createEvent("kebab-case-event")();
-
-      expect(useKebabCaseEventListener).toEqual(expect.any(Function));
-      expect(emitKebabCaseEvent).toEqual(expect.any(Function));
-    });
-
-    it("should properly derive the event's properties from a snake_case event name", async () => {
-      const { createEvent } = await import("./react-event-hook");
-      const { useSnakeCaseEventListener, emitSnakeCaseEvent } =
-        createEvent("snake_case_event")();
-
-      expect(useSnakeCaseEventListener).toEqual(expect.any(Function));
-      expect(emitSnakeCaseEvent).toEqual(expect.any(Function));
-    });
-
-    // TODO: add support for CONSTANT_CASE
-    it.skip("should properly derive the event's properties from a CONSTANT_CASE event name", async () => {
-      const { createEvent } = await import("./react-event-hook");
-      const { useCONSTANTCASEEVENTListener, emitCONSTANTCASEEVENT } =
-        createEvent("CONSTANT_CASE_EVENT")();
-
-      expect(useCONSTANTCASEEVENTListener).toEqual(expect.any(Function));
-      expect(emitCONSTANTCASEEVENT).toEqual(expect.any(Function));
-    });
   });
 
   describe("cross-tab events", () => {
@@ -162,7 +126,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent("message", "hello"),
+        newValue: serializeEvent(pascalCase("message"), "hello"),
       });
 
       expect(eventHandler).toBeCalledWith("hello");
@@ -176,7 +140,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent("ping", "hello"),
+        newValue: serializeEvent(pascalCase("ping"), "hello"),
       });
 
       expect(eventHandler).not.toBeCalled();
@@ -210,7 +174,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent("pong", undefined),
+        newValue: serializeEvent(pascalCase("pong"), undefined),
       });
 
       expect(eventHandler).not.toBeCalled();

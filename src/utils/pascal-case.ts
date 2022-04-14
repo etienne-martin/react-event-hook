@@ -1,26 +1,28 @@
 import { capitalize } from "./capitalize";
-import { ToPascaleCase } from "./pascal-case.def";
+import { Delimiters, PascalCase } from "./pascal-case.def";
+
+const delimiters: Delimiters = ["-", "_", " "];
 
 const isAllCaps = (str: string) => {
   return str.trim() && str.toUpperCase() === str;
 };
 
-export const toPascalCase = <S extends string>(str: S) => {
-  return str
-    .split(/[-_]/)
-    .map((token) =>
-      token
-        .split(/([A-Z]+)/)
-        .map((token, index, tokens) => {
-          const prevToken = tokens[index - 1];
+const lowercaseCapitalize = (str: string) => {
+  return capitalize(str.toLowerCase());
+};
 
-          if (prevToken && isAllCaps(prevToken)) {
-            return token;
-          }
+export const pascalCase = <Str extends string>(str: Str): PascalCase<Str> => {
+  const [before, after] = str.split(new RegExp(`[${delimiters.join("")}](.*)`));
 
-          return capitalize(token.toLowerCase());
-        })
-        .join("")
-    )
-    .join("") as ToPascaleCase<S>;
+  if (before !== undefined && after !== undefined) {
+    return `${lowercaseCapitalize(before)}${pascalCase(
+      lowercaseCapitalize(after)
+    )}` as PascalCase<Str>;
+  }
+
+  if (isAllCaps(str)) {
+    return lowercaseCapitalize(str) as PascalCase<Str>;
+  }
+
+  return capitalize(str) as PascalCase<Str>;
 };
