@@ -32,6 +32,8 @@ const { usePongListener, emitPong } = createEvent("pong")();
 Events can also extend to other tabs or windows by enabling the `crossTab` option.
 
 ```javascript
+import { createEvent } from "react-event-hook";
+
 const { useSignInListener, emitSignIn } = createEvent("signIn")({
   crossTab: true
 });
@@ -87,7 +89,7 @@ const { emitMessage } = createEvent("message")<Message>();
 
 emitMessage({
   subject: "greeting",
-  body: "hello",
+  body: "hello"
 });
 ```
 
