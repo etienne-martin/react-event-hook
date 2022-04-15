@@ -27,16 +27,6 @@ const { usePingListener, emitPing } = createEvent("ping")();
 const { usePongListener, emitPong } = createEvent("pong")();
 ```
 
-Event names are normalized to avoid conflicts, making the following all equivalent to each other:
-
-```javascript
-import { createEvent } from "react-event-hook";
-
-const { usePingPongListener, emitPingPong } = createEvent("pingPong")();
-const { usePingPongListener, emitPingPong } = createEvent("ping-pong")();
-const { usePingPongListener, emitPingPong } = createEvent("PING_PONG")();
-```
-
 Please note that since events are global, they can only be created once. Trying to recreate an existing event will result in an error.
 
 ### Cross-tab events
@@ -46,7 +36,7 @@ Events can also extend to other tabs that share the same origin by enabling the 
 ```javascript
 import { createEvent } from "react-event-hook";
 
-const { useSignInListener, emitSignIn } = createEvent("signIn")({
+const { useSignInListener, emitSignIn } = createEvent("sign-in")({
   crossTab: true
 });
 ```
