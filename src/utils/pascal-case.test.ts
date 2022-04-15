@@ -35,7 +35,7 @@ describe("pascal case", () => {
     ).toEqual(true);
   });
 
-  it("should convert colon/case to PascalCase", () => {
+  it("should convert colon:case to PascalCase", () => {
     expect(pascalCase("colon:case:text") === "ColonCaseText").toEqual(true);
     expect(pascalCase(":colon:case:text:") === "ColonCaseText").toEqual(true);
   });
