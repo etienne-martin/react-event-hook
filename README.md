@@ -51,8 +51,6 @@ const { useSignInListener, emitSignIn } = createEvent("signIn")({
 });
 ```
 
-When cross-tab events are emitted, they are first serialized using `JSON.stringify()`. If an event contains values that cannot be converted to JSON, the serialization process may transform them in unexpected ways. The solution is to stick with serializable values like arrays, simple objects or primitives (strings, numbers, booleans, null).
-
 ## Listening for events
 
 Events can be listened to using the listener function returned by `createEvent`. Listeners come in the form of a custom React hook.
@@ -80,6 +78,8 @@ const EmitterComponent = () => (
   <button onClick={() => emitMessage("hello")}>Send Message</button>
 );
 ```
+
+When a cross-tab event is emitted, its payload is first serialized using `JSON.stringify`. If a payload contains values that cannot be converted to JSON, the serialization will fail and an error will be thrown. Supported payload types are arrays, objects or primitives (strings, numbers, booleans, null, undefined).
 
 ## TypeScript
 

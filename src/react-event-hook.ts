@@ -59,15 +59,20 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
       if (crossTab) {
         try {
-          window.localStorage.setItem(
-            LOCAL_STORAGE_KEY,
-            serializeEvent(normalizedEventName, payload)
-          );
+          const serializedEvent = serializeEvent(normalizedEventName, payload);
+
+          try {
+            window.localStorage.setItem(LOCAL_STORAGE_KEY, serializedEvent);
+          } catch {
+            /**
+             * localStorage doesn't work in private mode prior to Safari 11.
+             * Cross-tab events are simply dropped if an error is encountered.
+             */
+          }
         } catch {
-          /**
-           * localStorage doesn't work in private mode prior to Safari 11.
-           * Cross-tab events are simply dropped if an error is encountered.
-           */
+          throw new Error(
+            `Could not emit "${normalizedEventName}" event. The event payload might contain values that cannot be serialized.`
+          );
         }
       }
     };

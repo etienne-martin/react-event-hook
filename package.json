@@ -7,10 +7,12 @@
     "react",
     "hook",
     "hooks",
+    "react-hooks",
     "event",
     "events",
     "event-emitter",
-    "pubsub"
+    "pubsub",
+    "typescript"
   ],
   "author": {
     "name": "Etienne Martin",

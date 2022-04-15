@@ -1,6 +1,6 @@
 import { pascalCase } from "./pascal-case";
 
-describe("pascal case", () => {
+describe("pascalCase", () => {
   it("should convert camelCase to PascalCase", () => {
     expect(pascalCase("camel") === "Camel").toEqual(true);
     expect(pascalCase("camelCaseText") === "CamelCaseText").toEqual(true);

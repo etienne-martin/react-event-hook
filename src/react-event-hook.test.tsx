@@ -4,6 +4,7 @@ import { renderHook } from "@testing-library/react-hooks";
 import { serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 import { normalizeEventName } from "./helpers/event-name";
+import { deserialize } from "./utils/serializer";
 
 const eventHandler = jest.fn();
 
@@ -77,7 +78,7 @@ describe("react-event-hook", () => {
     expect(count.innerHTML).toEqual("2");
   });
 
-  it("should emit and receive payloads", async () => {
+  it("should emit and receive simple payloads", async () => {
     const { createEvent } = await import("./react-event-hook");
 
     const { useMessageListener, emitMessage } =
@@ -87,6 +88,20 @@ describe("react-event-hook", () => {
     emitMessage("hello");
 
     expect(eventHandler).toBeCalledWith("hello");
+  });
+
+  it("should emit and receive complex payloads", async () => {
+    const { createEvent } = await import("./react-event-hook");
+
+    const { useComplexPayloadListener, emitComplexPayload } =
+      createEvent("complex-payload")<Date>();
+
+    const complexPayload = new Date();
+
+    renderHook(() => useComplexPayloadListener(eventHandler));
+    emitComplexPayload(complexPayload);
+
+    expect(eventHandler).toBeCalledWith(complexPayload);
   });
 
   it("should stop listening for events once unmounted", async () => {
@@ -103,16 +118,21 @@ describe("react-event-hook", () => {
     it("should emit cross-tab events", async () => {
       const { createEvent } = await import("./react-event-hook");
 
-      const { emitPing } = createEvent("ping")({
+      const { emitMessage } = createEvent("message")<string>({
         crossTab: true,
       });
 
-      emitPing();
+      emitMessage("hello");
 
-      expect(storageSetItemSpy).toBeCalledWith(
-        LOCAL_STORAGE_KEY,
-        expect.any(String)
-      );
+      const [call] = storageSetItemSpy.mock.calls;
+      const [firstArg, secondArg] = call ?? [];
+
+      expect(firstArg).toEqual(LOCAL_STORAGE_KEY);
+      expect(deserialize((secondArg ?? "") as string)).toEqual({
+        id: expect.any(String),
+        name: "Message",
+        payload: "hello",
+      });
     });
 
     it("should receive cross-tab events", async () => {
@@ -132,6 +152,18 @@ describe("react-event-hook", () => {
       expect(eventHandler).toBeCalledWith("hello");
     });
 
+    it("should throw an error when emitting unserializable cross-tab payloads", async () => {
+      const { createEvent } = await import("./react-event-hook");
+
+      const { emitComplexPayload } = createEvent("complex-payload")<Date>({
+        crossTab: true,
+      });
+
+      expect(() => emitComplexPayload(new Date())).toThrowError(
+        `Could not emit "ComplexPayload" event. The event payload might contain values that cannot be serialized.`
+      );
+    });
+
     it("should ignore cross-tab events when the crossTab option is disabled", async () => {
       const { createEvent } = await import("./react-event-hook");
 
@@ -143,7 +175,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(normalizeEventName("ping"), "hello"),
+        newValue: serializeEvent(normalizeEventName("ping"), undefined),
       });
 
       expect(eventHandler).not.toBeCalled();
