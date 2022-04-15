@@ -12,11 +12,12 @@
     "noImplicitThis": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
+    "noUncheckedIndexedAccess": true,
     "declaration": true,
     "declarationDir": "./dist",
     "emitDeclarationOnly": true,
     "esModuleInterop": true
   },
   "exclude": ["node_modules"],
-  "files": ["./src/index.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

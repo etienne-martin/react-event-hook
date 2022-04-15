@@ -1,45 +1,38 @@
 import { useEffect } from "react";
 import EventEmitter from "eventemitter3";
-import { capitalize } from "./utils/capitalize";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
+import { normalizeEventName } from "./helpers/event-name";
 
-export interface Options {
-  crossTab?: boolean;
-}
-
-export type Listener<Payload> = (handler: (payload: Payload) => void) => void;
-export type Emitter<Payload> = (payload: Payload) => void;
-
-interface Base<Payload> {
-  listener: {
-    prefix: "use";
-    suffix: "Listener";
-    fn: Listener<Payload>;
-  };
-  emitter: {
-    prefix: "emit";
-    suffix: "";
-    fn: Emitter<Payload>;
-  };
-}
-
-type CreatedEvent<EventName extends string, Payload> = {
-  [Property in keyof Base<Payload> as `${Base<Payload>[Property]["prefix"]}${Capitalize<EventName>}${Base<Payload>[Property]["suffix"]}`]: Base<Payload>[Property]["fn"];
-};
+import type {
+  CreatedEvent,
+  Emitter,
+  Listener,
+  Options,
+} from "./react-event-hook.def";
 
 const eventEmitter = new EventEmitter();
+const createdEvents = new Set<string>();
 
 export const createEvent = <EventName extends string>(name: EventName) => {
   return <Payload = void>({ crossTab = false }: Options = {}): CreatedEvent<
     EventName,
     Payload
   > => {
-    const listenerName = `use${capitalize(name)}Listener`;
-    const emitterName = `emit${capitalize(name)}`;
+    const normalizedEventName = normalizeEventName(name);
+    const listenerName = `use${normalizedEventName}Listener`;
+    const emitterName = `emit${normalizedEventName}`;
 
-    const useListener: Listener<any> = (handler: any) => {
+    if (createdEvents.has(normalizedEventName)) {
+      throw new Error(
+        `Events can only be created once. Another event named "${normalizedEventName}" already exists.`
+      );
+    }
+
+    createdEvents.add(normalizedEventName);
+
+    const useListener: Listener<Payload> = (handler) => {
       useStorageListener((storageEvent) => {
         if (!crossTab) return;
         if (!storageEvent.newValue) return;
@@ -47,34 +40,39 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
         const event = deserializeEvent(storageEvent.newValue);
 
-        if (event.name !== name) return;
+        if (event.name !== normalizedEventName) return;
 
         handler(event.payload);
       });
 
       useEffect(() => {
-        eventEmitter.addListener(name, handler);
+        eventEmitter.addListener(normalizedEventName, handler);
 
         return () => {
-          eventEmitter.removeListener(name, handler);
+          eventEmitter.removeListener(normalizedEventName, handler);
         };
       }, [handler]);
     };
 
-    const emitter: Emitter<any> = (event) => {
-      eventEmitter.emit(name, event);
+    const emitter: Emitter<Payload> = (payload) => {
+      eventEmitter.emit(normalizedEventName, payload);
 
       if (crossTab) {
         try {
-          window.localStorage.setItem(
-            LOCAL_STORAGE_KEY,
-            serializeEvent(name, event)
-          );
+          const serializedEvent = serializeEvent(normalizedEventName, payload);
+
+          try {
+            window.localStorage.setItem(LOCAL_STORAGE_KEY, serializedEvent);
+          } catch {
+            /**
+             * localStorage doesn't work in private mode prior to Safari 11.
+             * Cross-tab events are simply dropped if an error is encountered.
+             */
+          }
         } catch {
-          /**
-           * localStorage doesn't work in private mode prior to Safari 11.
-           * Cross-tab events are simply dropped if an error is encountered.
-           */
+          throw new Error(
+            `Could not emit "${normalizedEventName}" event. The event payload might contain values that cannot be serialized.`
+          );
         }
       }
     };

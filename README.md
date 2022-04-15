@@ -18,7 +18,7 @@ yarn add react-event-hook
 
 ## Creating events
 
-Events can be declared using the `createEvent` function. This function only takes the name of the event as an argument. It can be whatever you want. The result will be an object containing two functions, a listener and an emitter. Their name will automatically be derived from the name that was chosen for the event. 
+Events can be declared using the `createEvent` function. This function only takes the name of the event as an argument. It can be whatever you want. The result will be an object containing two functions, a listener and an emitter. Their name will automatically be derived from the name that was chosen for the event.
 
 ```javascript
 import { createEvent } from "react-event-hook";
@@ -27,17 +27,19 @@ const { usePingListener, emitPing } = createEvent("ping")();
 const { usePongListener, emitPong } = createEvent("pong")();
 ```
 
+Please note that since events are global, they can only be created once. Trying to recreate an existing event will result in an error.
+
 ### Cross-tab events
 
-Events can also extend to other tabs or windows by enabling the `crossTab` option.
+Events can also extend to other tabs that share the same origin by enabling the `crossTab` option. This can be used to propagate changes locally between multiple instances of an application.
 
 ```javascript
-const { useSignInListener, emitSignIn } = createEvent("signIn")({
+import { createEvent } from "react-event-hook";
+
+const { useSignInListener, emitSignIn } = createEvent("sign-in")({
   crossTab: true
 });
 ```
-
-When cross-tab events are emitted, they are first serialized using `JSON.stringify()`. If an event contains values that cannot be converted to JSON, the serialization process may transform them in unexpected ways. The solution is to stick with serializable values like arrays, simple objects or primitives (strings, numbers, booleans, null) when emitting cross-tabs events.
 
 ## Listening for events
 
@@ -67,6 +69,8 @@ const EmitterComponent = () => (
 );
 ```
 
+When a cross-tab event is emitted, its payload is first serialized using `JSON.stringify`. If a payload contains values that cannot be converted to JSON, the serialization will fail and an error will be thrown. Supported payload types are arrays, objects or primitives (strings, numbers, booleans, null, undefined).
+
 ## TypeScript
 
 This library is written in TypeScript to ensure type safety. It requires TypeScript v4.1 or greater due to its use of [Key Remapping](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as) and [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
@@ -87,13 +91,13 @@ const { emitMessage } = createEvent("message")<Message>();
 
 emitMessage({
   subject: "greeting",
-  body: "hello",
+  body: "hello"
 });
 ```
 
 ## Contributing
 
-When contributing to this project, please first discuss the change you wish to make via a [GitHub issue](https://github.com/etienne-martin/react-event-hook/issues/new) before making a change.
+When contributing to this project, please first discuss the change you wish to make via a [GitHub issue](https://github.com/etienne-martin/react-event-hook/issues/new).
 
 Run `yarn test` and update the tests if needed.
 
