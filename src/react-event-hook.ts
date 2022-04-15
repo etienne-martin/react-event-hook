@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import EventEmitter from "eventemitter3";
-import { pascalCase } from "./utils/pascal-case";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
+import { normalizeEventName } from "./helpers/event-name";
 
 import type {
   CreatedEvent,
@@ -20,7 +20,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     EventName,
     Payload
   > => {
-    const normalizedEventName = pascalCase(name);
+    const normalizedEventName = normalizeEventName(name);
     const listenerName = `use${normalizedEventName}Listener`;
     const emitterName = `emit${normalizedEventName}`;
 

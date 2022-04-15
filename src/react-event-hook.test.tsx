@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
 import { serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
-import { pascalCase } from "./utils/pascal-case";
+import { normalizeEventName } from "./helpers/event-name";
 
 const eventHandler = jest.fn();
 
@@ -30,6 +30,18 @@ describe("react-event-hook", () => {
 
     expect(useKebabCaseEventNameListener).toEqual(expect.any(Function));
     expect(emitKebabCaseEventName).toEqual(expect.any(Function));
+  });
+
+  it("should throw an error when recreating an existing event", async () => {
+    const { createEvent } = await import("./react-event-hook");
+
+    createEvent("existing-event")();
+
+    expect(() => createEvent("existing-event")()).toThrow(
+      new Error(
+        `Events can only be created once. Another event named "ExistingEvent" already exists.`
+      )
+    );
   });
 
   it("should emit and receive events", async () => {
@@ -65,19 +77,7 @@ describe("react-event-hook", () => {
     expect(count.innerHTML).toEqual("2");
   });
 
-  it("should log a warning when creating an event that already exists", async () => {
-    const { createEvent } = await import("./react-event-hook");
-
-    createEvent("duplicate-event")();
-
-    expect(() => createEvent("duplicate-event")()).toThrow(
-      new Error(
-        `Events can only be created once. Another event named "DuplicateEvent" already exists.`
-      )
-    );
-  });
-
-  it("should emit and receive event with payload", async () => {
+  it("should emit and receive payloads", async () => {
     const { createEvent } = await import("./react-event-hook");
 
     const { useMessageListener, emitMessage } =
@@ -126,21 +126,24 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(pascalCase("message"), "hello"),
+        newValue: serializeEvent(normalizeEventName("message"), "hello"),
       });
 
       expect(eventHandler).toBeCalledWith("hello");
     });
 
-    it("should ignore cross-tab events when the crossTab option is not enabled", async () => {
+    it("should ignore cross-tab events when the crossTab option is disabled", async () => {
       const { createEvent } = await import("./react-event-hook");
-      const { usePingListener } = createEvent("ping")();
+
+      const { usePingListener } = createEvent("ping")({
+        crossTab: false,
+      });
 
       renderHook(() => usePingListener(eventHandler));
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(pascalCase("ping"), "hello"),
+        newValue: serializeEvent(normalizeEventName("ping"), "hello"),
       });
 
       expect(eventHandler).not.toBeCalled();
@@ -174,7 +177,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(pascalCase("pong"), undefined),
+        newValue: serializeEvent(normalizeEventName("pong"), undefined),
       });
 
       expect(eventHandler).not.toBeCalled();

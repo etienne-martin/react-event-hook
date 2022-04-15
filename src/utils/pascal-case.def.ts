@@ -1,6 +1,6 @@
 // Inspired by: https://www.typescriptlang.org/play?ts=4.1.0-dev.20201028#example/string-manipulation-with-template-literals
 
-export type Delimiters = ["-", "_", " "];
+export type Delimiters = ["-", "_", ":", "/", ".", " "];
 
 type Delimiter = Delimiters[number];
 

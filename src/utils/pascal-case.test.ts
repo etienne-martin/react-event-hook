@@ -35,8 +35,22 @@ describe("pascal case", () => {
     ).toEqual(true);
   });
 
+  it("should convert colon/case to PascalCase", () => {
+    expect(pascalCase("colon:case:text") === "ColonCaseText").toEqual(true);
+    expect(pascalCase(":colon:case:text:") === "ColonCaseText").toEqual(true);
+  });
+
+  it("should convert slash/case to PascalCase", () => {
+    expect(pascalCase("slash/case/text") === "SlashCaseText").toEqual(true);
+    expect(pascalCase("/slash/case/text/") === "SlashCaseText").toEqual(true);
+  });
+
+  it("should convert dot.case to PascalCase", () => {
+    expect(pascalCase("dot.case.text") === "DotCaseText").toEqual(true);
+    expect(pascalCase(".dot.case.text.") === "DotCaseText").toEqual(true);
+  });
+
   it("should convert space case to PascalCase", () => {
-    expect(pascalCase("space case text") === "SpaceCaseText").toEqual(true);
     expect(pascalCase("space case text") === "SpaceCaseText").toEqual(true);
     expect(pascalCase("  space  case  text  ") === "SpaceCaseText").toEqual(
       true

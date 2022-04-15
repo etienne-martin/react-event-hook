@@ -1,7 +1,7 @@
 import { capitalize } from "./capitalize";
-import { Delimiters, PascalCase } from "./pascal-case.def";
+import type { Delimiters, PascalCase } from "./pascal-case.def";
 
-const delimiters: Delimiters = ["-", "_", " "];
+const delimiters: Delimiters = ["-", "_", ":", "/", ".", " "];
 
 const isAllCaps = (str: string) => {
   return str.toUpperCase() === str && str.toLowerCase() !== str;

@@ -18,7 +18,7 @@ yarn add react-event-hook
 
 ## Creating events
 
-Events can be declared using the `createEvent` function. This function only takes the name of the event as an argument. It can be whatever you want. The result will be an object containing two functions, a listener and an emitter. Their name will automatically be derived from the name that was chosen for the event. 
+Events can be declared using the `createEvent` function. This function only takes the name of the event as an argument. It can be whatever you want. The result will be an object containing two functions, a listener and an emitter. Their name will automatically be derived from the name that was chosen for the event.
 
 ```javascript
 import { createEvent } from "react-event-hook";
@@ -27,9 +27,28 @@ const { usePingListener, emitPing } = createEvent("ping")();
 const { usePongListener, emitPong } = createEvent("pong")();
 ```
 
+Event names are normalized to avoid conflicts, making the following all equivalent to each other:
+
+```javascript
+import { createEvent } from "react-event-hook";
+
+const { usePingPongListener, emitPingPong } = createEvent("pingPong")();
+const { usePingPongListener, emitPingPong } = createEvent("PingPong")();
+const { usePingPongListener, emitPingPong } = createEvent("ping-pong")();
+const { usePingPongListener, emitPingPong } = createEvent("ping_pong")();
+const { usePingPongListener, emitPingPong } = createEvent("PING_PONG")();
+const { usePingPongListener, emitPingPong } = createEvent("ping:pong")();
+const { usePingPongListener, emitPingPong } = createEvent("ping/pong")();
+const { usePingPongListener, emitPingPong } = createEvent("PING/PONG")();
+const { usePingPongListener, emitPingPong } = createEvent("ping.pong")();
+const { usePingPongListener, emitPingPong } = createEvent("ping pong")();
+```
+
+Please note that since events are global, they can only be created once. Trying to recreate an existing event will result in an error.
+
 ### Cross-tab events
 
-Events can also extend to other tabs that share the same origin by enabling the `crossTab` option.
+Events can also extend to other tabs that share the same origin by enabling the `crossTab` option. This can be used to propagate changes locally between multiple instances of an application.
 
 ```javascript
 import { createEvent } from "react-event-hook";
@@ -39,7 +58,7 @@ const { useSignInListener, emitSignIn } = createEvent("signIn")({
 });
 ```
 
-When cross-tab events are emitted, they are first serialized using `JSON.stringify()`. If an event contains values that cannot be converted to JSON, the serialization process may transform them in unexpected ways. The solution is to stick with serializable values like arrays, simple objects or primitives (strings, numbers, booleans, null) when emitting cross-tabs events.
+When cross-tab events are emitted, they are first serialized using `JSON.stringify()`. If an event contains values that cannot be converted to JSON, the serialization process may transform them in unexpected ways. The solution is to stick with serializable values like arrays, simple objects or primitives (strings, numbers, booleans, null).
 
 ## Listening for events
 
@@ -95,7 +114,7 @@ emitMessage({
 
 ## Contributing
 
-When contributing to this project, please first discuss the change you wish to make via a [GitHub issue](https://github.com/etienne-martin/react-event-hook/issues/new) before making a change.
+When contributing to this project, please first discuss the change you wish to make via a [GitHub issue](https://github.com/etienne-martin/react-event-hook/issues/new).
 
 Run `yarn test` and update the tests if needed.
 
