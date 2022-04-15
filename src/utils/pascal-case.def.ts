@@ -7,8 +7,8 @@ type Delimiter = Delimiters[number];
 type LowercaseCapitalize<S extends string> = Capitalize<Lowercase<S>>;
 
 export type PascalCase<Str extends string> =
-  Str extends `${infer Before}${Delimiter}${infer After}`
-    ? `${LowercaseCapitalize<Before>}${PascalCase<LowercaseCapitalize<After>>}`
+  Str extends `${infer Token}${Delimiter}${infer Rest}`
+    ? `${LowercaseCapitalize<Token>}${PascalCase<Rest>}`
     : Str extends Uppercase<Str>
     ? LowercaseCapitalize<Str>
     : Capitalize<Str>;

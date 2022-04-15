@@ -4,7 +4,7 @@ import { Delimiters, PascalCase } from "./pascal-case.def";
 const delimiters: Delimiters = ["-", "_", " "];
 
 const isAllCaps = (str: string) => {
-  return str.trim() && str.toUpperCase() === str;
+  return str.toUpperCase() === str && str.toLowerCase() !== str;
 };
 
 const lowercaseCapitalize = (str: string) => {
@@ -12,11 +12,11 @@ const lowercaseCapitalize = (str: string) => {
 };
 
 export const pascalCase = <Str extends string>(str: Str): PascalCase<Str> => {
-  const [before, after] = str.split(new RegExp(`[${delimiters.join("")}](.*)`));
+  const [token, rest] = str.split(new RegExp(`[${delimiters.join("")}](.*)`));
 
-  if (before !== undefined && after !== undefined) {
-    return `${lowercaseCapitalize(before)}${pascalCase(
-      lowercaseCapitalize(after)
+  if (token !== undefined && rest !== undefined) {
+    return `${lowercaseCapitalize(token)}${pascalCase(
+      rest
     )}` as PascalCase<Str>;
   }
 
