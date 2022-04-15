@@ -232,4 +232,25 @@ describe("react-event-hook", () => {
       expect(eventHandler).not.toBeCalled();
     });
   });
+
+  describe("typescript", () => {
+    it("should support union types as payloads", async () => {
+      const { createEvent } = await import("./react-event-hook");
+      const { emitPingPong } = createEvent("pingPong")<"ping" | "pong">();
+
+      emitPingPong("ping");
+      emitPingPong("pong");
+    });
+
+    it("should support event handlers with optional parameters", async () => {
+      const { createEvent } = await import("./react-event-hook");
+      const { usePingListener } = createEvent("ping")();
+
+      const eventHandler = (optionalParam = "defaultParam") => {
+        return optionalParam;
+      };
+
+      renderHook(() => usePingListener(eventHandler));
+    });
+  });
 });
