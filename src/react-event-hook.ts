@@ -32,7 +32,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
     createdEvents.add(normalizedEventName);
 
-    const useListener: Listener<any> = (handler: any) => {
+    const useListener: Listener<Payload> = (handler) => {
       useStorageListener((storageEvent) => {
         if (!crossTab) return;
         if (!storageEvent.newValue) return;
@@ -54,14 +54,14 @@ export const createEvent = <EventName extends string>(name: EventName) => {
       }, [handler]);
     };
 
-    const emitter: Emitter<any> = (event) => {
-      eventEmitter.emit(normalizedEventName, event);
+    const emitter: Emitter<Payload> = (payload) => {
+      eventEmitter.emit(normalizedEventName, payload);
 
       if (crossTab) {
         try {
           window.localStorage.setItem(
             LOCAL_STORAGE_KEY,
-            serializeEvent(normalizedEventName, event)
+            serializeEvent(normalizedEventName, payload)
           );
         } catch {
           /**
