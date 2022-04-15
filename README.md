@@ -33,15 +33,8 @@ Event names are normalized to avoid conflicts, making the following all equivale
 import { createEvent } from "react-event-hook";
 
 const { usePingPongListener, emitPingPong } = createEvent("pingPong")();
-const { usePingPongListener, emitPingPong } = createEvent("PingPong")();
 const { usePingPongListener, emitPingPong } = createEvent("ping-pong")();
-const { usePingPongListener, emitPingPong } = createEvent("ping_pong")();
 const { usePingPongListener, emitPingPong } = createEvent("PING_PONG")();
-const { usePingPongListener, emitPingPong } = createEvent("ping:pong")();
-const { usePingPongListener, emitPingPong } = createEvent("ping/pong")();
-const { usePingPongListener, emitPingPong } = createEvent("PING/PONG")();
-const { usePingPongListener, emitPingPong } = createEvent("ping.pong")();
-const { usePingPongListener, emitPingPong } = createEvent("ping pong")();
 ```
 
 Please note that since events are global, they can only be created once. Trying to recreate an existing event will result in an error.
