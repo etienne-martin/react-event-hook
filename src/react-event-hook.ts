@@ -32,7 +32,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
 
     createdEvents.add(normalizedEventName);
 
-    const useListener: Listener<Payload> = (handler) => {
+    const useListener: Listener<any> = (handler: (payload: any) => void) => {
       useStorageListener((storageEvent) => {
         if (!crossTab) return;
         if (!storageEvent.newValue) return;

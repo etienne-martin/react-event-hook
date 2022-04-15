@@ -2,9 +2,9 @@ import { getTypeOf } from "./type-of";
 
 const UNDEFINED_PLACEHOLDER = "react-event-hook:undefined";
 
-class SerializationError extends Error {
-  message = "The input value could not be serialized";
-}
+const SERIALIZATION_ERROR = new Error(
+  "The input value could not be serialized"
+);
 
 export const serialize = (input: unknown) => {
   try {
@@ -18,7 +18,7 @@ export const serialize = (input: unknown) => {
     const deserialized = deserialize(serialized);
     const outputType = getTypeOf(deserialized);
 
-    if (outputType !== inputType) throw new SerializationError();
+    if (outputType !== inputType) throw SERIALIZATION_ERROR;
 
     if (inputType === "object") {
       Object.values(input as Record<string, unknown>).forEach((value) =>
@@ -32,7 +32,7 @@ export const serialize = (input: unknown) => {
 
     return serialized;
   } catch {
-    throw new SerializationError();
+    throw SERIALIZATION_ERROR;
   }
 };
 

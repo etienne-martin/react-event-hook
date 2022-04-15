@@ -4,7 +4,10 @@ export interface Options {
   crossTab?: boolean;
 }
 
-export type Listener<Payload> = (handler: (payload: Payload) => void) => void;
+export type Listener<Payload> = Payload extends void
+  ? (handler: () => void) => void
+  : (handler: (payload: Payload) => void) => void;
+
 export type Emitter<Payload> = (payload: Payload) => void;
 
 interface Base<Payload> {
