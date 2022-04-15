@@ -29,7 +29,7 @@ const { usePongListener, emitPong } = createEvent("pong")();
 
 ### Cross-tab events
 
-Events can also extend to other tabs or windows by enabling the `crossTab` option.
+Events can also extend to other tabs that share the same origin by enabling the `crossTab` option.
 
 ```javascript
 import { createEvent } from "react-event-hook";
