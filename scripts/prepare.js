@@ -4,6 +4,7 @@ const pkg = require("../package.json");
 
 // Remove unnecessary properties from package.json
 delete pkg.scripts;
+delete pkg.dependencies;
 delete pkg.devDependencies;
 
 // Copy package.json to the dist folder
