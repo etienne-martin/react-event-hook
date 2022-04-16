@@ -27,7 +27,7 @@ const { usePingListener, emitPing } = createEvent("ping")();
 const { usePongListener, emitPong } = createEvent("pong")();
 ```
 
-Please note that since events are global, they can only be created once. Trying to recreate an existing event will result in an error.
+Please note that since events are global, they should only be created once. Conflicting event names can cause problems if their associated payload differs. Make sure to call the `createEvent` function only once per event and reuse the resulting functions throughout your application.
 
 ### Cross-tab events
 
@@ -69,7 +69,7 @@ const EmitterComponent = () => (
 );
 ```
 
-When a cross-tab event is emitted, its payload is first serialized using `JSON.stringify`. If a payload contains values that cannot be converted to JSON, the serialization will fail and an error will be thrown. Supported payload types are arrays, objects or primitives (strings, numbers, booleans, null, undefined).
+When a cross-tab event is emitted, its payload is first serialized using `JSON.stringify`. If a payload contains values that cannot be converted to JSON, an error will be thrown and the event won't be delivered. Cross-tab payloads can contain any of the following value types: arrays, objects, or primitives (strings, numbers, booleans, null, undefined).
 
 ## TypeScript
 

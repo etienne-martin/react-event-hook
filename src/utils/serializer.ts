@@ -1,4 +1,4 @@
-import { getTypeOf } from "./type-of";
+import { getTypeOf } from "./typeof";
 
 const UNDEFINED_PLACEHOLDER = "react-event-hook:undefined";
 

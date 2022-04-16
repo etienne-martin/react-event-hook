@@ -3,7 +3,8 @@ import EventEmitter from "eventemitter3";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
-import { normalizeEventName } from "./helpers/event-name";
+import { pascalCase } from "./utils/pascal-case";
+import { generateRandomNumber } from "./utils/random-number";
 
 import type {
   CreatedEvent,
@@ -13,24 +14,30 @@ import type {
 } from "./react-event-hook.def";
 
 const eventEmitter = new EventEmitter();
-const createdEvents = new Set<string>();
+const emittedEvents = new Map<string, string>();
 
 export const createEvent = <EventName extends string>(name: EventName) => {
   return <Payload = void>({ crossTab = false }: Options = {}): CreatedEvent<
     EventName,
     Payload
   > => {
-    const normalizedEventName = normalizeEventName(name);
-    const listenerName = `use${normalizedEventName}Listener`;
-    const emitterName = `emit${normalizedEventName}`;
+    const normalizedEventName = name.trim();
+    const pascalCaseEventName = pascalCase(normalizedEventName);
+    const listenerName = `use${pascalCaseEventName}Listener`;
+    const emitterName = `emit${pascalCaseEventName}`;
+    const eventId = `${Date.now()}:${generateRandomNumber()}`;
 
-    if (createdEvents.has(normalizedEventName)) {
-      throw new Error(
-        `Events can only be created once. Another event named "${normalizedEventName}" already exists.`
-      );
-    }
+    const duplicateEventDetection = () => {
+      if (emittedEvents.has(normalizedEventName)) {
+        if (emittedEvents.get(normalizedEventName) !== eventId) {
+          console.warn(
+            `Another event named "${normalizedEventName}" already exists. Conflicting event names can cause problems if their associated payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
+          );
+        }
+      }
 
-    createdEvents.add(normalizedEventName);
+      emittedEvents.set(normalizedEventName, eventId);
+    };
 
     const useListener: Listener<any> = (handler: (payload: any) => void) => {
       useStorageListener((storageEvent) => {
@@ -55,6 +62,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     };
 
     const emitter: Emitter<Payload> = (payload) => {
+      duplicateEventDetection();
       eventEmitter.emit(normalizedEventName, payload);
 
       if (crossTab) {
