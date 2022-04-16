@@ -1,4 +1,4 @@
-import { getTypeOf } from "./type-of";
+import { getTypeOf } from "./typeof";
 
 describe("getTypeOf", () => {
   it("should return the actual type of the provided value", () => {

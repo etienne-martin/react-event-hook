@@ -1,12 +1,14 @@
 import React, { FC, useState } from "react";
 import { render } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
+import { expectType } from "tsd";
 import { serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
-import { normalizeEventName } from "./helpers/event-name";
 import { deserialize } from "./utils/serializer";
 
 const eventHandler = jest.fn();
+
+const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
 
 const storageSetItemSpy = jest.spyOn(
   Object.getPrototypeOf(window.localStorage),
@@ -20,12 +22,14 @@ const dispatchStorageEvent = (event: StorageEventInit) => {
 describe("react-event-hook", () => {
   beforeEach(() => {
     eventHandler.mockClear();
+    consoleWarnMock.mockClear();
     storageSetItemSpy.mockClear();
     jest.resetModules();
   });
 
   it("should derive the event's properties from the event name", async () => {
     const { createEvent } = await import("./react-event-hook");
+
     const { useKebabCaseEventNameListener, emitKebabCaseEventName } =
       createEvent("kebab-case-event-name")();
 
@@ -33,15 +37,18 @@ describe("react-event-hook", () => {
     expect(emitKebabCaseEventName).toEqual(expect.any(Function));
   });
 
-  it("should throw an error when recreating an existing event", async () => {
+  it("should log a warning when duplicate events are detected", async () => {
     const { createEvent } = await import("./react-event-hook");
+    const { emitEvent } = createEvent("event")();
+    const { emitEvent: emitDuplicateEvent } = createEvent("event")();
 
-    createEvent("existing-event")();
+    emitEvent();
+    emitDuplicateEvent();
+    emitDuplicateEvent();
 
-    expect(() => createEvent("existing-event")()).toThrow(
-      new Error(
-        `Events can only be created once. Another event named "ExistingEvent" already exists.`
-      )
+    expect(consoleWarnMock).toBeCalledTimes(1);
+    expect(consoleWarnMock).toBeCalledWith(
+      `Another event named "event" already exists. Conflicting event names can cause problems if their associated payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
     );
   });
 
@@ -130,7 +137,7 @@ describe("react-event-hook", () => {
       expect(firstArg).toEqual(LOCAL_STORAGE_KEY);
       expect(deserialize((secondArg ?? "") as string)).toEqual({
         id: expect.any(String),
-        name: "Message",
+        name: "message",
         payload: "hello",
       });
     });
@@ -146,7 +153,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(normalizeEventName("message"), "hello"),
+        newValue: serializeEvent("message", "hello"),
       });
 
       expect(eventHandler).toBeCalledWith("hello");
@@ -160,7 +167,7 @@ describe("react-event-hook", () => {
       });
 
       expect(() => emitComplexPayload(new Date())).toThrowError(
-        `Could not emit "ComplexPayload" event. The event payload might contain values that cannot be serialized.`
+        `Could not emit "complex-payload" event. The event payload might contain values that cannot be serialized.`
       );
     });
 
@@ -175,7 +182,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(normalizeEventName("ping"), undefined),
+        newValue: serializeEvent("ping", undefined),
       });
 
       expect(eventHandler).not.toBeCalled();
@@ -209,7 +216,7 @@ describe("react-event-hook", () => {
 
       dispatchStorageEvent({
         key: LOCAL_STORAGE_KEY,
-        newValue: serializeEvent(normalizeEventName("pong"), undefined),
+        newValue: serializeEvent("pong", undefined),
       });
 
       expect(eventHandler).not.toBeCalled();
@@ -234,23 +241,27 @@ describe("react-event-hook", () => {
   });
 
   describe("typescript", () => {
-    it("should support union types as payloads", async () => {
+    it("should support payloads with union types", async () => {
       const { createEvent } = await import("./react-event-hook");
-      const { emitPingPong } = createEvent("pingPong")<"ping" | "pong">();
 
-      emitPingPong("ping");
-      emitPingPong("pong");
+      const { usePingPongListener, emitPingPong } = createEvent("pingPong")<
+        "ping" | "pong"
+      >();
+
+      expectType<(handler: (payload: "ping" | "pong") => void) => void>(
+        usePingPongListener
+      );
+
+      expectType<(payload: "ping" | "pong") => void>(emitPingPong);
     });
 
     it("should support event handlers with optional parameters", async () => {
       const { createEvent } = await import("./react-event-hook");
       const { usePingListener } = createEvent("ping")();
 
-      const eventHandler = (optionalParam = "defaultParam") => {
-        return optionalParam;
-      };
-
-      renderHook(() => usePingListener(eventHandler));
+      expectType<(handler: (payload?: "string") => void) => void>(
+        usePingListener
+      );
     });
   });
 });

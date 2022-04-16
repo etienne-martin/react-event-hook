@@ -1,4 +1,5 @@
-import type { NormalizedEventName } from "./helpers/event-name.def";
+import type { Trim } from "./utils/trim.def";
+import type { PascalCase } from "./utils/pascal-case.def";
 
 export interface Options {
   crossTab?: boolean;
@@ -27,7 +28,7 @@ type FuncName<
   Prefix extends string,
   Suffix extends string,
   EventName extends string
-> = `${Prefix}${NormalizedEventName<EventName>}${Suffix}`;
+> = `${Prefix}${PascalCase<Trim<EventName>>}${Suffix}`;
 
 export type CreatedEvent<EventName extends string, Payload> = {
   [Property in keyof Base<Payload> as FuncName<
