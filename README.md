@@ -27,8 +27,6 @@ const { usePingListener, emitPing } = createEvent("ping")();
 const { usePongListener, emitPong } = createEvent("pong")();
 ```
 
-Please note that since events are global, they should only be created once. Conflicting event names can cause problems if their associated payload differs. Make sure to call the `createEvent` function only once per event and reuse the resulting functions throughout your application.
-
 ### Cross-tab events
 
 Events can also extend to other tabs that share the same origin by enabling the `crossTab` option. This can be used to propagate changes locally between multiple instances of an application.
@@ -40,6 +38,10 @@ const { useSignInListener, emitSignIn } = createEvent("sign-in")({
   crossTab: true
 });
 ```
+
+### Duplicate events
+
+Please note that since events are registered globally, they should only be created once. Duplicate events will share the same listener. This could lead to unexpected issues if their payload differs. Make sure to call the `createEvent` function only once per event and reuse the resulting functions throughout your application.
 
 ## Listening for events
 
