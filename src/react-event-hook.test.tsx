@@ -48,7 +48,7 @@ describe("react-event-hook", () => {
 
     expect(consoleWarnMock).toBeCalledTimes(1);
     expect(consoleWarnMock).toBeCalledWith(
-      `Another event named "event" already exists. Conflicting event names can cause problems if their associated payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
+      `Another event named "event" already exists. Duplicate events share the same listener. This can lead to unexpected issues if their payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
     );
   });
 

@@ -31,7 +31,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
       if (emittedEvents.has(normalizedEventName)) {
         if (emittedEvents.get(normalizedEventName) !== eventId) {
           console.warn(
-            `Another event named "${normalizedEventName}" already exists. Conflicting event names can cause problems if their associated payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
+            `Another event named "${normalizedEventName}" already exists. Duplicate events share the same listener. This can lead to unexpected issues if their payload differs. Make sure to call the \`createEvent\` function only once per event and reuse the resulting functions throughout your application.`
           );
         }
       }
