@@ -131,11 +131,10 @@ describe("react-event-hook", () => {
 
       emitMessage("hello");
 
-      const [call] = storageSetItemSpy.mock.calls;
-      const [firstArg, secondArg] = call ?? [];
+      const [key, value = ""] = storageSetItemSpy.mock.calls[0] ?? [];
 
-      expect(firstArg).toEqual(LOCAL_STORAGE_KEY);
-      expect(deserialize((secondArg ?? "") as string)).toEqual({
+      expect(key).toEqual(LOCAL_STORAGE_KEY);
+      expect(deserialize(value as string)).toEqual({
         id: expect.any(String),
         name: "message",
         payload: "hello",
