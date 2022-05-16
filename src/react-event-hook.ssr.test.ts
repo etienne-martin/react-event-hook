@@ -4,12 +4,10 @@
 
 import { EventEmitterMock } from "./tests/mocks/eventemitter3.mock";
 
-const eventHandler = jest.fn();
 const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
 
 describe("react-event-hook (SSR)", () => {
   beforeEach(() => {
-    eventHandler.mockClear();
     consoleWarnMock.mockClear();
     jest.resetModules();
   });
