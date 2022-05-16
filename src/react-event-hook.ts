@@ -4,7 +4,8 @@ import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 import { pascalCase } from "./utils/pascal-case";
-import { generateRandomNumber } from "./utils/random-number";
+import { canUseDom } from "./utils/dom";
+import { generateRandomId } from "./utils/random-id";
 
 import type {
   CreatedEvent,
@@ -25,7 +26,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     const pascalCaseEventName = pascalCase(normalizedEventName);
     const listenerName = `use${pascalCaseEventName}Listener`;
     const emitterName = `emit${pascalCaseEventName}`;
-    const eventId = `${Date.now()}:${generateRandomNumber()}`;
+    const eventId = generateRandomId();
 
     const duplicateEventDetection = () => {
       if (emittedEvents.has(normalizedEventName)) {
@@ -62,6 +63,13 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     };
 
     const emitter: Emitter<Payload> = (payload) => {
+      if (!canUseDom) {
+        console.warn(
+          `Could not emit "${normalizedEventName}" event. Events cannot be emitted from the server.`
+        );
+        return;
+      }
+
       duplicateEventDetection();
       eventEmitter.emit(normalizedEventName, payload);
 

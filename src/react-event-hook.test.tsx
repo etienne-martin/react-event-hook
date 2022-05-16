@@ -7,7 +7,6 @@ import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 import { deserialize } from "./utils/serializer";
 
 const eventHandler = jest.fn();
-
 const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
 
 const storageSetItemSpy = jest.spyOn(
