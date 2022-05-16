@@ -1,5 +1,5 @@
-import { generateRandomNumber } from "../utils/random-number";
 import { deserialize, serialize } from "../utils/serializer";
+import { generateRandomId } from "../utils/random-id";
 
 interface DeserializedEvent {
   name: string;
@@ -8,7 +8,7 @@ interface DeserializedEvent {
 
 export const serializeEvent = (name: string, payload: unknown) => {
   return serialize({
-    id: `${Date.now()}:${generateRandomNumber()}`,
+    id: generateRandomId(),
     name,
     payload,
   });
