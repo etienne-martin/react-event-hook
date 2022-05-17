@@ -1,13 +1,16 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { render } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
 import { expectType } from "tsd";
 import { serializeEvent } from "./helpers/event-serializer";
 import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 import { deserialize } from "./utils/serializer";
+import { EventEmitterMock } from "./tests/mocks/eventemitter3.mock";
 
 const eventHandler = jest.fn();
 const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
+const originalAddListener = EventEmitterMock.addListener;
+const originalAddEventListener = window.addEventListener;
 
 const storageSetItemSpy = jest.spyOn(
   Object.getPrototypeOf(window.localStorage),
@@ -24,6 +27,8 @@ describe("react-event-hook", () => {
     consoleWarnMock.mockClear();
     storageSetItemSpy.mockClear();
     jest.resetModules();
+    EventEmitterMock.addListener = originalAddListener;
+    window.addEventListener = originalAddEventListener;
   });
 
   it("should derive the event's properties from the event name", async () => {
@@ -82,6 +87,65 @@ describe("react-event-hook", () => {
     emitIncrementButton.click();
 
     expect(count.innerHTML).toEqual("2");
+  });
+
+  it("should bind listeners before child components have a chance to emit", async () => {
+    const { createEvent } = await import("./react-event-hook");
+    const { useIncrementListener, emitIncrement } = createEvent("increment")();
+
+    const ChildComponent: FC = () => {
+      useEffect(() => emitIncrement(), []);
+      return null;
+    };
+
+    const ParentComponent: FC = () => {
+      const [count, setCount] = useState(0);
+
+      useIncrementListener(() => {
+        setCount(count + 1);
+      });
+
+      return (
+        <>
+          <div data-testid="count">{count}</div>
+          <ChildComponent />
+        </>
+      );
+    };
+
+    const { getByTestId } = render(<ParentComponent />);
+    const count = getByTestId("count");
+
+    expect(count.innerHTML).toEqual("1");
+  });
+
+  it("should avoid unbinding and rebinding listeners on every render", async () => {
+    const { createEvent } = await import("./react-event-hook");
+    const { useIncrementListener } = createEvent("increment")();
+    const addStorageEventListenerSpy = jest.fn();
+
+    EventEmitterMock.addListener = jest.fn();
+
+    window.addEventListener = (...args: [any, any, any]) => {
+      if (args[0] === "storage") {
+        addStorageEventListenerSpy();
+      }
+
+      originalAddEventListener(...args);
+    };
+
+    const ListenerComponent: FC = () => {
+      useIncrementListener(() => undefined);
+      return null;
+    };
+
+    const { rerender } = render(<ListenerComponent />);
+
+    rerender(<ListenerComponent />);
+    rerender(<ListenerComponent />);
+
+    expect(EventEmitterMock.addListener).toBeCalledTimes(1);
+    expect(addStorageEventListenerSpy).toBeCalledTimes(1);
   });
 
   it("should emit and receive simple payloads", async () => {

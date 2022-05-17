@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import EventEmitter from "eventemitter3";
 import { useStorageListener } from "./hooks/storage.hook";
 import { deserializeEvent, serializeEvent } from "./helpers/event-serializer";
@@ -6,6 +5,8 @@ import { LOCAL_STORAGE_KEY } from "./react-event-hook.constant";
 import { pascalCase } from "./utils/pascal-case";
 import { canUseDom } from "./utils/dom";
 import { generateRandomId } from "./utils/random-id";
+import { useEvent } from "./hooks/event.hook";
+import { useIsomorphicLayoutEffect } from "./hooks/layout-effect.hook";
 
 import type {
   CreatedEvent,
@@ -41,6 +42,8 @@ export const createEvent = <EventName extends string>(name: EventName) => {
     };
 
     const useListener: Listener<any> = (handler: (payload: any) => void) => {
+      const eventHandler = useEvent(handler);
+
       useStorageListener((storageEvent) => {
         if (!crossTab) return;
         if (!storageEvent.newValue) return;
@@ -53,13 +56,13 @@ export const createEvent = <EventName extends string>(name: EventName) => {
         handler(event.payload);
       });
 
-      useEffect(() => {
-        eventEmitter.addListener(normalizedEventName, handler);
+      useIsomorphicLayoutEffect(() => {
+        eventEmitter.addListener(normalizedEventName, eventHandler);
 
         return () => {
-          eventEmitter.removeListener(normalizedEventName, handler);
+          eventEmitter.removeListener(normalizedEventName, eventHandler);
         };
-      }, [handler]);
+      }, [eventHandler]);
     };
 
     const emitter: Emitter<Payload> = (payload) => {
