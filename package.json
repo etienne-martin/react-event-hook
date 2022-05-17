@@ -1,6 +1,6 @@
 {
   "name": "react-event-hook",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "A library for emitting and listening to events in a React application",
   "license": "MIT",
   "keywords": [
@@ -33,7 +33,7 @@
     "predev": "yarn cleanup",
     "prebuild": "yarn cleanup",
     "cleanup": "rm -rf ./dist",
-    "test": "jest src --coverage --verbose --runInBand",
+    "test": "jest src --coverage --verbose",
     "coverage": "coveralls < ./coverage/lcov.info"
   },
   "peerDependencies": {

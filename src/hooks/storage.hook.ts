@@ -1,11 +1,14 @@
-import { useEffect } from "react";
+import { useEvent } from "./event.hook";
+import { useIsomorphicLayoutEffect } from "./layout-effect.hook";
 
 export const useStorageListener = (handler: (event: StorageEvent) => void) => {
-  useEffect(() => {
-    window.addEventListener("storage", handler);
+  const eventHandler = useEvent(handler);
+
+  useIsomorphicLayoutEffect(() => {
+    window.addEventListener("storage", eventHandler);
 
     return () => {
-      window.removeEventListener("storage", handler);
+      window.removeEventListener("storage", eventHandler);
     };
-  }, [handler]);
+  }, [eventHandler]);
 };
