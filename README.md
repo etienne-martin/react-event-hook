@@ -73,6 +73,18 @@ const EmitterComponent = () => (
 
 When a cross-tab event is emitted, its payload is first serialized using `JSON.stringify`. If a payload contains values that cannot be converted to JSON, an error will be thrown and the event won't be delivered. Cross-tab payloads can contain any of the following value types: arrays, objects, or primitives (strings, numbers, booleans, null, undefined).
 
+### Broadcasting events (cross-tab)
+
+You can choose to broadcast events to only other tabs using the `broadcast` function. This way, the tab emitting the event will not receive it but the other tabs will. Make sure the `crossTab` option is enabled for your event.
+
+```jsx
+import { emitMessage } from "./events";
+
+const EmitterComponent = () => (
+  <button onClick={() => emitMessage.broadcast("hello")}>Send Message</button>
+);
+```
+
 ## TypeScript
 
 This library is written in TypeScript to ensure type safety. It requires TypeScript v4.1 or greater due to its use of [Key Remapping](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as) and [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).

@@ -302,6 +302,22 @@ describe("react-event-hook", () => {
     });
   });
 
+  describe("broadcast", () => {
+    it("should not send the event to the sender", async () => {
+      const { createEvent } = await import("./react-event-hook");
+
+      const { useMessageListener, emitMessage } = createEvent(
+        "message"
+      )<string>({
+        crossTab: true,
+      });
+
+      renderHook(() => useMessageListener(eventHandler));
+      emitMessage.broadcast("hello");
+      expect(eventHandler).not.toBeCalledWith("hello");
+    });
+  });
+
   describe("typescript", () => {
     it("should support payloads with union types", async () => {
       const { createEvent } = await import("./react-event-hook");
