@@ -221,20 +221,6 @@ describe("react-event-hook", () => {
       expect(eventHandler).toBeCalledWith("hello");
     });
 
-    it("should broadcast cross-tab events", async () => {
-      const { createEvent } = await import("./react-event-hook");
-
-      const { useMessageListener, emitMessage } = createEvent(
-        "message"
-      )<string>({
-        crossTab: true,
-      });
-
-      renderHook(() => useMessageListener(eventHandler));
-      emitMessage.broadcast("hello");
-      expect(eventHandler).not.toBeCalledWith("hello");
-    });
-
     it("should throw an error when emitting unserializable cross-tab payloads", async () => {
       const { createEvent } = await import("./react-event-hook");
 
@@ -313,6 +299,22 @@ describe("react-event-hook", () => {
       });
 
       expect(eventHandler).not.toBeCalled();
+    });
+  });
+
+  describe("broadcast", () => {
+    it("should not send the event to the sender", async () => {
+      const { createEvent } = await import("./react-event-hook");
+
+      const { useMessageListener, emitMessage } = createEvent(
+        "message"
+      )<string>({
+        crossTab: true,
+      });
+
+      renderHook(() => useMessageListener(eventHandler));
+      emitMessage.broadcast("hello");
+      expect(eventHandler).not.toBeCalledWith("hello");
     });
   });
 

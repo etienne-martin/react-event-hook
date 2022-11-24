@@ -11,6 +11,7 @@
     "event",
     "events",
     "event-emitter",
+    "broadcast",
     "pubsub",
     "typescript"
   ],
