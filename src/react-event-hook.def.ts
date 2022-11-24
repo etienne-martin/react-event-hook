@@ -9,7 +9,9 @@ export type Listener<Payload> = Payload extends void
   ? (handler: () => void) => void
   : (handler: (payload: Payload) => void) => void;
 
-export type Emitter<Payload> = (payload: Payload) => void;
+export type Emitter<Payload> = ((payload: Payload) => void) & {
+  broadcast: (payload: Payload) => void;
+};
 
 interface Base<Payload> {
   listener: {

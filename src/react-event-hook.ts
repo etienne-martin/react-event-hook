@@ -65,7 +65,7 @@ export const createEvent = <EventName extends string>(name: EventName) => {
       }, [eventHandler]);
     };
 
-    const emitter: Emitter<Payload> = (payload) => {
+    const emitEvent = (payload: Payload, { broadcast = false } = {}) => {
       if (!canUseDom) {
         console.warn(
           `Could not emit "${normalizedEventName}" event. Events cannot be emitted from the server.`
@@ -74,7 +74,10 @@ export const createEvent = <EventName extends string>(name: EventName) => {
       }
 
       duplicateEventDetection();
-      eventEmitter.emit(normalizedEventName, payload);
+
+      if (!broadcast) {
+        eventEmitter.emit(normalizedEventName, payload);
+      }
 
       if (crossTab) {
         try {
@@ -95,6 +98,10 @@ export const createEvent = <EventName extends string>(name: EventName) => {
         }
       }
     };
+
+    const emitter: Emitter<Payload> = (payload) => emitEvent(payload);
+
+    emitter.broadcast = (payload) => emitEvent(payload, { broadcast: true });
 
     return {
       [listenerName]: useListener,
